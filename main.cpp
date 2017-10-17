@@ -1,12 +1,15 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <cstdlib>
+#include <ctime>
 #include <thread>
 #include "compiler_helper.h"
 #include "mandelbrot.hpp"
 #include "config_file.hpp"
 
 static void print_usage_and_exit(char *argv[]);
+static unsigned long long get_monotonic_microseconds();
 
 int main(int argc, char *argv[])
 {
@@ -71,11 +74,32 @@ int main(int argc, char *argv[])
 
     int tot_pixel = cf.width * cf.height;
 
+    std::cout << "Starting " << threads << " threads" << std::endl;
+
+    unsigned long long microseconds0 = get_monotonic_microseconds();
+
     m.start(out_filename, threads, [&tot_pixel](int p) {
-		std::cout << " " << (float)p / tot_pixel * 100 << " %                                \r" << std::flush;
+		std::cout << " "
+            << static_cast<float>(p) / tot_pixel * 100
+            << " %                                \r" << std::flush;
 	});
 
-    std::cout << "Completed.                                      \n" << std::endl;
+    unsigned long long microseconds1 = get_monotonic_microseconds();
+
+    std::cout << "Completed.                                      " << std::endl;
+
+    std::cout << "Image saved in " << out_filename << std::endl;
+
+    double seconds = static_cast<double>(microseconds1 - microseconds0) / 1000000.0;
+    std::cout << "Time elapsed: "
+        << std::setiosflags(std::ios::fixed)
+        << std::setprecision(3) << seconds
+        << " s" << std::endl;
+
+    std::cout << "Speed: "
+        << std::setprecision(6)
+        << static_cast<double>(tot_pixel) / seconds
+        << " pixel/s" << std::endl;
 
     return EXIT_SUCCESS;
 }
@@ -86,4 +110,11 @@ static void print_usage_and_exit(char *argv[])
     std::cout << "\t" << argv[0] << " CONFIG_FILE [-t threads] [-o output_file]" << std::endl;
 
     exit(EXIT_FAILURE);
+}
+
+static unsigned long long get_monotonic_microseconds()
+{
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return ((unsigned long long)now.tv_sec) * 1000000LL + now.tv_nsec / 1000;
 }
