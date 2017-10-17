@@ -54,14 +54,6 @@ int main(int argc, char *argv[])
     if(threads == 0)
         threads = std::thread::hardware_concurrency();
 
-    if(argc < 2)
-    {
-        std::cerr << "Usage:" << std::endl;
-        std::cerr << "\t" << argv[0] << " FILE" << std::endl;
-
-        return EXIT_FAILURE;
-    }
-
     config_file cf(in_filename);
 
     mandelbrot<double> m(cf.width, cf.height, cf.xmin, cf.xmax, cf.ymin, cf.ymax);
