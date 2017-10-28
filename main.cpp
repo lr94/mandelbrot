@@ -11,6 +11,52 @@
 static void print_usage_and_exit(char *argv[]);
 static unsigned long long get_monotonic_microseconds();
 
+template <typename T>
+void do_job(config_file &cf, int threads, std::string &out_filename)
+{
+    mandelbrot<T> m(cf.width, cf.height, cf.xmin, cf.xmax, cf.ymin, cf.ymax);
+
+    if(cf.red_function != nullptr)
+        m.red_function = cf.red_function;
+    if(cf.blue_function != nullptr)
+        m.blue_function = cf.blue_function;
+    if(cf.green_function != nullptr)
+        m.green_function = cf.green_function;
+
+    m.max_iterations = cf.max_iterations;
+
+    m.apply_filter_bc(cf.brightness, cf.contrast);
+
+    int tot_pixel = cf.width * cf.height;
+
+    std::cout << "Starting " << threads << " threads" << std::endl;
+
+    unsigned long long microseconds0 = get_monotonic_microseconds();
+
+    m.start(out_filename, threads, [&tot_pixel](int p) {
+		std::cout << " "
+            << static_cast<float>(p) / tot_pixel * 100
+            << " %                                \r" << std::flush;
+	});
+
+    unsigned long long microseconds1 = get_monotonic_microseconds();
+
+    std::cout << "Completed.                                      " << std::endl;
+
+    std::cout << "Image saved in " << out_filename << std::endl;
+
+    double seconds = static_cast<double>(microseconds1 - microseconds0) / 1000000.0;
+    std::cout << "Time elapsed: "
+        << std::setiosflags(std::ios::fixed)
+        << std::setprecision(3) << seconds
+        << " s" << std::endl;
+
+    std::cout << "Speed: "
+        << std::setprecision(6)
+        << static_cast<double>(tot_pixel) / seconds
+        << " pixel/s" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     std::string out_filename = "mandelbrot.png";
@@ -59,47 +105,7 @@ int main(int argc, char *argv[])
 
     config_file cf(in_filename);
 
-    mandelbrot<double> m(cf.width, cf.height, cf.xmin, cf.xmax, cf.ymin, cf.ymax);
-
-    if(cf.red_function != nullptr)
-        m.red_function = cf.red_function;
-    if(cf.blue_function != nullptr)
-        m.blue_function = cf.blue_function;
-    if(cf.green_function != nullptr)
-        m.green_function = cf.green_function;
-
-    m.max_iterations = cf.max_iterations;
-
-    m.apply_filter_bc(cf.brightness, cf.contrast);
-
-    int tot_pixel = cf.width * cf.height;
-
-    std::cout << "Starting " << threads << " threads" << std::endl;
-
-    unsigned long long microseconds0 = get_monotonic_microseconds();
-
-    m.start(out_filename, threads, [&tot_pixel](int p) {
-		std::cout << " "
-            << static_cast<float>(p) / tot_pixel * 100
-            << " %                                \r" << std::flush;
-	});
-
-    unsigned long long microseconds1 = get_monotonic_microseconds();
-
-    std::cout << "Completed.                                      " << std::endl;
-
-    std::cout << "Image saved in " << out_filename << std::endl;
-
-    double seconds = static_cast<double>(microseconds1 - microseconds0) / 1000000.0;
-    std::cout << "Time elapsed: "
-        << std::setiosflags(std::ios::fixed)
-        << std::setprecision(3) << seconds
-        << " s" << std::endl;
-
-    std::cout << "Speed: "
-        << std::setprecision(6)
-        << static_cast<double>(tot_pixel) / seconds
-        << " pixel/s" << std::endl;
+    do_job<double>(cf, threads, out_filename);
 
     return EXIT_SUCCESS;
 }
