@@ -111,7 +111,7 @@ public:
         this->ymin = ymin;
         this->ymax = ymax;
 
-        progress_step = width * height / 1000;
+        progress_step = width * height / 10000;
     }
 
     cfunction1 red_function = default_color_function;

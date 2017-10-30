@@ -82,6 +82,15 @@ config_file::config_file(std::string filename)
             cfunction0 f = compile0(value_string.c_str());
             contrast = f();
         }
+        else if(var_name == "real_type")
+        {
+            if(value_string == "float")
+                real_type = config_file::base_type::FLOAT;
+            else if(value_string == "double")
+                real_type = config_file::base_type::DOUBLE;
+            else if(value_string == "float128")
+                real_type = config_file::base_type::FLOAT128;
+        }
         else
             throw var_name; // TODO: Implement an exception class
     }

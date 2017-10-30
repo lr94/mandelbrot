@@ -8,6 +8,9 @@
 #include "mandelbrot.hpp"
 #include "config_file.hpp"
 
+ #include <boost/multiprecision/float128.hpp>
+ using namespace boost::multiprecision;
+
 static void print_usage_and_exit(char *argv[]);
 static unsigned long long get_monotonic_microseconds();
 
@@ -105,7 +108,20 @@ int main(int argc, char *argv[])
 
     config_file cf(in_filename);
 
-    do_job<double>(cf, threads, out_filename);
+    switch(cf.real_type)
+    {
+        case config_file::base_type::FLOAT:
+            do_job<float>(cf, threads, out_filename);
+            break;
+
+        case config_file::base_type::DOUBLE:
+            do_job<double>(cf, threads, out_filename);
+            break;
+
+        case config_file::base_type::FLOAT128:
+            do_job<float128>(cf, threads, out_filename);
+            break;
+    }
 
     return EXIT_SUCCESS;
 }

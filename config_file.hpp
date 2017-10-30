@@ -9,6 +9,10 @@ private:
     config_file operator=(const config_file &cf);
     config_file(const config_file &cf);
 public:
+    enum base_type
+    {
+        FLOAT, DOUBLE, FLOAT128
+    };
     config_file(std::string filename);
 
     cfunction1 red_function = nullptr;
@@ -22,5 +26,7 @@ public:
     int width = 300, height = 200;
 
     float brightness = 0, contrast = 0;
+
+    config_file::base_type real_type = config_file::base_type::DOUBLE;
 };
 #endif
