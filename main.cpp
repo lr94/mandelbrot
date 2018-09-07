@@ -8,8 +8,8 @@
 #include "mandelbrot.hpp"
 #include "config_file.hpp"
 
- #include <boost/multiprecision/float128.hpp>
- using namespace boost::multiprecision;
+#include <boost/multiprecision/float128.hpp>
+using namespace boost::multiprecision;
 
 static void print_usage_and_exit(char *argv[]);
 static unsigned long long get_monotonic_microseconds();
