@@ -40,12 +40,18 @@ int png_bitmap::save(std::string filename)
 	png_structp png_ptr;
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if(png_ptr == nullptr)
+	{
+		fclose(fp);
 		return -1;
+	}
 
 	png_infop info_ptr;
 	info_ptr = png_create_info_struct(png_ptr);
 	if(info_ptr == nullptr)
+	{
+		fclose(fp);
 		return -1;
+	}
 
 	png_init_io(png_ptr, fp);
 
